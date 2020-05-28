@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "120496516765",
+    "firebase_url": "https://se380project-a0e84.firebaseio.com",
+    "project_id": "se380project-a0e84",
+    "storage_bucket": "se380project-a0e84.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120496516765:android:0f4f23de1d8451f1d2ee74",
+        "android_client_info": {
+          "package_name": "com.example.se380final"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "120496516765-ecr5c4788ge2bjp9g575he4i93egivr1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.se380final",
+            "certificate_hash": "e96efb73a1b02535340e92cb71874b1da0d514f4"
+          }
+        },
+        {
+          "client_id": "120496516765-83khd18il9cj32602faog2thldlkvtac.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDLA64mHWAtw-bc0Sg2A8bgJKMkwygfv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "120496516765-83khd18il9cj32602faog2thldlkvtac.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
