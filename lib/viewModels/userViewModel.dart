@@ -110,9 +110,21 @@ class UserViewModel with ChangeNotifier implements IAuthService,ILikeService,IFi
   }
 
   @override
-  Future<User> signInWithFacebook() {
-    // TODO: implement signInWithFacebook
-    return null;
+  Future<User> signInWithFacebook() async{
+    try{
+      state = UserState.LoadingUser;
+      _user = await _userRepository.signInWithFacebook();
+      return _user;
+    }catch(e){
+      print("View Model signInWithGoogle error $e");
+      return null;
+    }finally{
+      if(_user == null){
+        state = UserState.ErrorUser;
+      }else{
+        state = UserState.LoadedUser;
+      }
+    }
   }
 
   @override
@@ -197,5 +209,25 @@ class UserViewModel with ChangeNotifier implements IAuthService,ILikeService,IFi
     var link =
         await _userRepository.getDownloadURL(uid, fileType,file);
     return link;
+  }
+
+  @override
+  Future<bool> deleteLikeFilm(String userId, String cinemaId) async{
+    String error = "";
+    try{
+      state = UserState.LoadingUser;
+      bool isTrue = await _userRepository.deleteLikeFilm(userId,cinemaId);
+      return isTrue;
+    }catch(e){
+      print("Delete LikeFilm error $e");
+      error += e;
+      throw Exception(error);
+    }finally{
+      if(error != ""){
+        state = UserState.ErrorUser;
+      }else{
+        state = UserState.LoadedUser;
+      }
+    }
   }
 }

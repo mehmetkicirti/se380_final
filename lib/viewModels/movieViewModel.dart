@@ -157,10 +157,10 @@ class MovieViewModel with ChangeNotifier implements IMovieService{
   }
 
   @override
-  Future<Result> getNowPlayingFilms() async{
+  Future<Result> getNowPlayingFilms({int page = 1}) async{
     try{
       state = MovieState.LoadingMovie;
-      _resultNowPlaying =await _movieRepository.getNowPlayingFilms();
+      _resultNowPlaying =await _movieRepository.getNowPlayingFilms(page: page);
       return _resultNowPlaying;
     }catch(e){
       debugPrint("Movie getNowPlayingFilms error : $e");
@@ -193,10 +193,10 @@ class MovieViewModel with ChangeNotifier implements IMovieService{
   }
 
   @override
-  Future<Result> getUpcomingFilms() async{
+  Future<Result> getUpcomingFilms({int page = 1}) async{
     try{
       state = MovieState.LoadingMovie;
-      _resultUpcoming =await _movieRepository.getUpcomingFilms();
+      _resultUpcoming =await _movieRepository.getUpcomingFilms(page: page);
       return _resultUpcoming;
     }catch(e){
       debugPrint("Movie getUpcomingFilms error : $e");
