@@ -9,8 +9,8 @@ abstract class IMovieService{
   Future<void> getPhoto(String url);
   Future<Result> getByCategoryMovies(int genreId);
   Future<Category> getAllCategoryName({bool isTv = false});
-  Future<Result> getUpcomingFilms();
-  Future<Result> getNowPlayingFilms();
+  Future<Result> getUpcomingFilms({int page = 1});
+  Future<Result> getNowPlayingFilms({int page = 1});
   Future<ResultSearch> searchByName(String name);
   Future<Movie> getMovieById(int id);
   Future<Result> getSimilarMovies(int id);

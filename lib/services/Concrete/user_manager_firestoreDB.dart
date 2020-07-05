@@ -37,7 +37,7 @@ class UserManagerFirestoreDB implements IUserService,ILikeService,IFireStorageSe
       await this.saveUser(user);
       return true;
     }else{
-      throw Exception("User Not Found");
+      throw Exception("Like Film Error");
     }
   }
 
@@ -76,6 +76,23 @@ class UserManagerFirestoreDB implements IUserService,ILikeService,IFireStorageSe
       url = await (await uploadTask.onComplete).ref.getDownloadURL();
     }
     return url;
+  }
+
+  @override
+  Future<bool> deleteLikeFilm(String userId, String cinemaId) async{
+    DocumentSnapshot _snapshot = await _firestore.document("Users/$userId").get();
+    if(_snapshot.exists){
+      User user = User.fromMap(_snapshot.data);
+      if(user.likes.contains(cinemaId)){
+        user.likes.remove(cinemaId);
+      }else{
+        throw Exception("Already Defined");
+      }
+      await this.saveUser(user);
+      return true;
+    }else{
+      throw Exception("Delete Like Film Error");
+    }
   }
 
 }

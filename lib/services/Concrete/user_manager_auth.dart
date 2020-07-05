@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:se380final/models/User/users.dart';
 import 'package:se380final/services/Abstract/IAuthService.dart';
@@ -52,9 +53,26 @@ class UserManagerAuth implements IAuthService{
   }
 
   @override
-  Future<User> signInWithFacebook() {
-    // TODO: implement signInWithFacebook
-    return null;
+  Future<User> signInWithFacebook() async{
+    //getting package
+      final _facebookLogin = FacebookLogin();
+      //permission ref => facebook dev de var
+      FacebookLoginResult facebookLoginResult = await _facebookLogin.logIn(['public_profile','email']);
+      switch(facebookLoginResult.status){
+        case FacebookLoginStatus.loggedIn:
+          if(facebookLoginResult.accessToken != null){
+            AuthResult _firebaseResult = await _fireBaseAuth.signInWithCredential(FacebookAuthProvider.getCredential(accessToken: facebookLoginResult.accessToken.token));
+            FirebaseUser user = _firebaseResult.user;
+            return _userFromFirebase(user);
+          }
+          break;
+        case FacebookLoginStatus.cancelledByUser:
+          print("Login Cancelled!!");
+          break;
+        case FacebookLoginStatus.error:
+          print("Error : ${facebookLoginResult.errorMessage}");
+          break;
+      }
   }
 
   @override
@@ -70,10 +88,10 @@ class UserManagerAuth implements IAuthService{
           FirebaseUser _user = result.user;
           return _userFromFirebase(_user);
         }else{
-          throw Exception("Id Token veya Access token gelirken bir hata oluştu");
+          throw Exception("There was an error token.");
         }
       }else{
-        throw Exception("Google User gelirken bir hata oluştu");
+        throw Exception("When getting User, get an error");
       }
     }catch(e){
       print(e.toString());

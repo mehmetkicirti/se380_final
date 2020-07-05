@@ -88,8 +88,8 @@ class MovieManager implements IMovieService{
   }
 
   @override
-  Future<Result> getNowPlayingFilms() async{
-    final url = "$baseUrl/movie/now_playing?api_key=$apiKey";
+  Future<Result> getNowPlayingFilms({int page = 1}) async{
+    final url = "$baseUrl/movie/now_playing?api_key=$apiKey&page=$page";
     var response = await _httpClient.get(url);
     if(response.statusCode != 200){
       if(response.statusCode == 408) {
@@ -161,8 +161,8 @@ class MovieManager implements IMovieService{
   }
 
   @override
-  Future<Result> getUpcomingFilms() async{
-    final url = "$baseUrl/movie/upcoming?api_key=$apiKey";
+  Future<Result> getUpcomingFilms({int page = 1}) async{
+    final url = "$baseUrl/movie/upcoming?api_key=$apiKey&page=$page";
     var response = await _httpClient.get(url);
     if(response.statusCode != 200){
       if(response.statusCode == 408) {
