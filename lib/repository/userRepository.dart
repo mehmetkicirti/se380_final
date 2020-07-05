@@ -1,7 +1,6 @@
 
 import 'dart:io';
 
-import 'package:se380final/models/User/likes.dart';
 import 'package:se380final/models/User/users.dart';
 import 'package:se380final/services/Abstract/IAuthService.dart';
 import 'package:se380final/services/Abstract/IFireStorageService.dart';
@@ -55,18 +54,24 @@ class UserRepository implements IAuthService,ILikeService,IFireStorageService{
       return resultPassword;
      */
     User user = await _firebaseAuthService.signInWithEmailAndPassword(email, password);
+    user =await _firestoreService.readUser(user.uid);
     return _firestoreService.readUser(user.uid);
   }
 
   @override
   Future<User> signInWithFacebook() async {
-    return null;
-    //TODO
+    User user =  await _firebaseAuthService.signInWithFacebook();
+    user =await _firestoreService.readUser(user.uid);
+    bool result = await _firestoreService.saveUser(user);
+    if(result)
+      return await _firestoreService.readUser(user.uid);
+    else return null;
   }
 
   @override
   Future<User> signInWithGoogle() async {
     User user =  await _firebaseAuthService.signInWithGoogle();
+    user =await _firestoreService.readUser(user.uid);
     bool result = await _firestoreService.saveUser(user);
     if(result)
       return await _firestoreService.readUser(user.uid);
@@ -93,5 +98,10 @@ class UserRepository implements IAuthService,ILikeService,IFireStorageService{
       var url = await _firestoreService.getDownloadURL(uid, fileType, file);
       await _firestoreService.updateProfilePhoto(uid, url);
       return url;
+  }
+
+  @override
+  Future<bool> deleteLikeFilm(String userId, String cinemaId) async{
+    return await _firestoreService.deleteLikeFilm(userId, cinemaId);
   }
 }

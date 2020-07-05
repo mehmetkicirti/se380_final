@@ -32,8 +32,8 @@ class MovieRepository implements IMovieService{
   }
 
   @override
-  Future<Result> getNowPlayingFilms() {
-    return _movieService.getNowPlayingFilms();
+  Future<Result> getNowPlayingFilms({int page = 1}) {
+    return _movieService.getNowPlayingFilms(page: page);
   }
 
   @override
@@ -42,8 +42,8 @@ class MovieRepository implements IMovieService{
   }
 
   @override
-  Future<Result> getUpcomingFilms() {
-    return _movieService.getUpcomingFilms();
+  Future<Result> getUpcomingFilms({int page = 1}) {
+    return _movieService.getUpcomingFilms(page: page);
   }
 
   @override
