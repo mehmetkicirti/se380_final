@@ -8,8 +8,6 @@ import 'package:se380final/pages/error_page.dart';
 import 'package:se380final/pages/movie_page.dart';
 import 'package:se380final/viewModels/movieViewModel.dart';
 
-enum MediaType { Movie, TV, Person }
-
 class CustomUtils {
   static Widget getSearchTitle(
       String title, FontWeight fontWeight, Color color, EdgeInsets padding) {

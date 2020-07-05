@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:se380final/common/colors.dart';
 import 'package:se380final/common/platform_sensitive_dialog.dart';
 import 'package:se380final/models/User/users.dart';
-import 'package:se380final/pages/error_page.dart';
-import 'package:se380final/pages/login_page.dart';
 import 'package:se380final/utils/formOptions.dart';
 import 'package:se380final/viewModels/userViewModel.dart';
 
@@ -39,8 +37,7 @@ class _CustomStepperState extends State<CustomStepper> {
       left: widget.width*0.009,
       right: widget.width*0.009,
       child: BounceInRight(
-        duration: Duration(milliseconds: 1000),
-        delay: Duration(milliseconds: 500),
+        delay: Duration(milliseconds: 1200),
         child: Container(
           width: widget.width,
           height: widget.height*0.5,

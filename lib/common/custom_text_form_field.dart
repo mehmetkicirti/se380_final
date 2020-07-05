@@ -27,7 +27,7 @@ class CustomTextFormField extends StatefulWidget{
   bool autoFocus;
   CustomTextFormField(
       {this.suffixIcon: false,this.textColor:Colors.black,this.suffixColor:Colors.white, this.key, @required this.padding, this.hintText, this.onSaved, this.initialValue,
-        this.validator, this.inputType, this.hiddenText: false, this.prefixIcon,
+        this.validator, this.inputType, this.hiddenText: true, this.prefixIcon,
         this.iconColor: Colors
             .white, this.iconSize, this.labelText, this.hintColor,
         this.labelColor: Colors
@@ -77,9 +77,9 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
                   widget.hiddenText = widget.hiddenText != false ? false:true;
                 });
               },
-              icon: widget.hiddenText != false ?
-              Icon(Icons.remove_red_eye,color: Colors.grey):
+              icon: widget.hiddenText != true ?
               Icon(Icons.remove_red_eye,color: widget.suffixColor,)
+                  :Icon(Icons.remove_red_eye,color: Colors.grey)
           ):null,
 
           hintStyle: GoogleFonts.timmana(

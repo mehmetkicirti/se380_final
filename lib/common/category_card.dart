@@ -24,17 +24,14 @@ class CategoryCard extends StatelessWidget {
             Positioned(
               top: 15,
               left: 5,
-              child: BounceInLeft(
-                delay: Duration(milliseconds: 1200),
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 4,
-                  child: Text(
-                    title,
-                    style: GoogleFonts.rubik(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
+              child: Container(
+                width: MediaQuery.of(context).size.width / 4,
+                child: Text(
+                  title,
+                  style: GoogleFonts.rubik(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
