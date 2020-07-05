@@ -116,7 +116,7 @@ class _IntroScreenState extends State<IntroScreen> {
                           child: InkWell(
                             onTap: () => NavigatorUtils.pushPage(LoginPage(), context, Curves.easeIn, 1200, Alignment.center),
                             child: BounceInUp(
-                              duration: Duration(milliseconds: 1200),
+                              delay: Duration(milliseconds: 1200),
                               child: Container(
                                 height: height*0.08,
                                 width: width*0.5,

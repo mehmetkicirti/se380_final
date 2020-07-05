@@ -5,31 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:se380final/common/colors.dart';
-import 'package:se380final/common/custom_navigator.dart';
 import 'package:se380final/common/fadeAnimation.dart';
 import 'package:se380final/common/font_style.dart';
-import 'package:se380final/common/my_globals.dart';
 import 'package:se380final/models/Movies/Film/movie.dart';
 import 'package:se380final/models/result.dart';
 import 'package:se380final/pages/error_page.dart';
+import 'package:se380final/pages/home_page_core.dart';
 import 'package:se380final/pages/movie_page.dart';
 import 'package:se380final/viewModels/movieViewModel.dart';
 
-class MovieList extends StatefulWidget {
+class CategoryList extends StatefulWidget {
   Result movies;
   String header;
 
-  MovieList({this.header, this.movies});
+  CategoryList({this.header, this.movies});
 
   @override
-  _MovieListState createState() => _MovieListState();
+  _CategoryListState createState() => _CategoryListState();
 }
 
-class _MovieListState extends State<MovieList> {
+class _CategoryListState extends State<CategoryList> {
   ScrollController _controller;
-  int _initialPage = 1;
   bool isBottom = false;
-  bool isTop = false;
   @override
   void initState() {
     _controller = ScrollController();
@@ -40,27 +37,15 @@ class _MovieListState extends State<MovieList> {
     super.dispose();
     _controller.dispose();
   }
-
   _moveUp() {
-    if(isTop && _initialPage>1)
-      _updateData(context);
-    else
       _controller.animateTo(0,
           curve: Curves.linear, duration: Duration(milliseconds: 500));
-  }
-
-  _moveDown() {
-    _controller.animateTo(
-        _controller.offset + MediaQuery.of(context).size.height,
-        curve: Curves.linear,
-        duration: Duration(milliseconds: 500));
   }
 
   @override
   Widget build(BuildContext context) {
     final _movieModel = Provider.of<MovieViewModel>(context);
     return Scaffold(
-      key: myGlobals.scaffoldKey,
       backgroundColor: bgColor,
       resizeToAvoidBottomPadding: false,
       body: LayoutBuilder(
@@ -103,7 +88,7 @@ class _MovieListState extends State<MovieList> {
                     top: height * 0.045,
                     left: width * 0.01,
                     child: BounceInRight(
-                      delay: Duration(milliseconds: 1200),
+                      delay: Duration(milliseconds: 1500),
                       child: Center(
                         child: IconButton(
                           icon: Icon(
@@ -117,7 +102,13 @@ class _MovieListState extends State<MovieList> {
                             } else {
                               await _movieModel.getNowPlayingFilms(page: 1);
                             }
-                            Navigator.pop(context);
+                                Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context)=>HomepageCore()),(Route<dynamic> route){
+                                  bool shouldPop = false;
+                                  if(route.settings.name == "homepage"){
+                                    shouldPop = true;
+                                  }
+                                  return shouldPop;
+                                });
                           },
                         ),
                       ),
@@ -131,42 +122,23 @@ class _MovieListState extends State<MovieList> {
                       child: NotificationListener<ScrollNotification>(
                         // ignore: missing_return
                         onNotification: (scrollNotification) {
-                          if(_controller.offset <= _controller.position.minScrollExtent &&
-                              !_controller.position.outOfRange){
-                            debugPrint("Reached Top");
-                            setState(() {
-                              isTop = true;
-                            });
-                          }
                           if (scrollNotification.metrics.pixels >=
-                                  scrollNotification.metrics.maxScrollExtent &&
+                              scrollNotification.metrics.maxScrollExtent &&
                               !scrollNotification.metrics.outOfRange) {
                             debugPrint("Reached bottom");
                             setState(() {
                               isBottom = true;
                             });
                           } else if (scrollNotification
-                              is ScrollUpdateNotification) {
+                          is ScrollUpdateNotification) {
                             setState(() {
                               isBottom = false;
-                              isTop=false;
-                            });
-                          } else if (ScrollNotification
-                              is ScrollStartNotification) {
-                            setState(() {
-                              if (_initialPage > 1) {
-                                _initialPage -= 1;
-                              } else {
-                                _initialPage = 1;
-                              }
                             });
                           }
                         },
                         child: ListView.builder(
                           itemBuilder: (context, index) {
-                            final movie = widget.header == "UpComing"
-                                ? _movieModel.resultUpcoming.results
-                                : _movieModel.resultNowPlaying.results;
+                            final movie = widget.movies.results;
                             return Padding(
                               padding: EdgeInsets.only(left: width * 0.02),
                               child: FadeInDownBig(
@@ -182,17 +154,17 @@ class _MovieListState extends State<MovieList> {
                                             Radius.circular(16)),
                                         child: FadeInImage(
                                           placeholder:
-                                              AssetImage("assets/loading.gif"),
+                                          AssetImage("assets/loading.gif"),
                                           image: NetworkImage(
                                               "${movie[index].posterPath}"),
                                           fit: BoxFit.cover,
                                           width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
+                                              .size
+                                              .width *
                                               0.5,
                                           height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
+                                              .size
+                                              .height *
                                               0.35,
                                         ),
                                       ),
@@ -204,7 +176,7 @@ class _MovieListState extends State<MovieList> {
                                       flex: 2,
                                       child: Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Padding(
                                             padding: EdgeInsets.symmetric(
@@ -275,11 +247,11 @@ class _MovieListState extends State<MovieList> {
                                                               color: Colors
                                                                   .black45,
                                                               offset:
-                                                                  Offset(-1, 1),
+                                                              Offset(-1, 1),
                                                               blurRadius: 12)
                                                         ],
                                                         fontWeight:
-                                                            FontWeight.w600,
+                                                        FontWeight.w600,
                                                         fontSize: 15,
                                                       ),
                                                     ),
@@ -311,40 +283,22 @@ class _MovieListState extends State<MovieList> {
                     ),
                   ),
                   Positioned(
-                    bottom: height * 0.02,
-                    left: width * 0.4,
-                    right: width * 0.4,
-                    child: isBottom
-                        ? InkWell(
-                            onTap: () => _changePage(),
-                            child: Transform.rotate(
-                                angle: pi / 2,
-                                child: Container(
-                                  child: Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.white,
-                                  ),
-                                )),
-                          )
-                        : Container(),
-                  ),
-                  Positioned(
                       top: height * 0.1,
                       left: width * 0.4,
                       right: width * 0.4,
                       child: isBottom
                           ? InkWell(
-                              onTap: () => _moveUp(),
-                              child: Transform.rotate(
-                                  angle: -pi / 2,
-                                  child: Container(
-                                    child: Icon(
-                                      Icons.arrow_forward_ios,
-                                      color: Colors.white,
-                                      size: 64,
-                                    ),
-                                  )),
-                            )
+                        onTap: () => _moveUp(),
+                        child: Transform.rotate(
+                            angle: -pi / 2,
+                            child: Container(
+                              child: Icon(
+                                Icons.arrow_forward_ios,
+                                color: Colors.white,
+                                size: 64,
+                              ),
+                            )),
+                      )
                           : Container())
                 ],
               );
@@ -355,7 +309,7 @@ class _MovieListState extends State<MovieList> {
               );
             case MovieState.ErrorMovie:
               return ErrorPage(
-                title: "Movies List Error",
+                title: "Categories List Error",
               );
             default:
               return Container();
@@ -368,42 +322,6 @@ class _MovieListState extends State<MovieList> {
   _getMoviePage(BuildContext context, int id) async {
     final _movieModel = Provider.of<MovieViewModel>(context, listen: false);
     Movie movie = await _movieModel.getMovieById(id);
-    return await NavigatorUtils.pushPage(
-        MoviePage(movie: movie),
-        myGlobals.scaffoldKey.currentContext,
-        Curves.easeIn,
-        1000,
-        Alignment.center);
-  }
-
-  _updatePageNumber() {
-    setState(() {
-      _initialPage += 1;
-    });
-  }
-  _topUpdatePageNumber(){
-    setState(() {
-      if(isTop)
-        _initialPage-=1;
-    });
-  }
-  _changePage() async {
-    _updatePageNumber();
-    final _movieModel = Provider.of<MovieViewModel>(context, listen: false);
-    if (widget.header == "UpComing") {
-      await _movieModel.getUpcomingFilms(page: _initialPage);
-    } else {
-      await _movieModel.getNowPlayingFilms(page: _initialPage);
-    }
-  }
-
-  _updateData(BuildContext context) async{
-    _topUpdatePageNumber();
-    final _movieModel = Provider.of<MovieViewModel>(context, listen: false);
-    if (widget.header == "UpComing") {
-      await _movieModel.getUpcomingFilms(page: _initialPage);
-    } else {
-      await _movieModel.getNowPlayingFilms(page: _initialPage);
-    }
+    return await Navigator.push(context, MaterialPageRoute(builder: (context)=>MoviePage(movie: movie,)));
   }
 }

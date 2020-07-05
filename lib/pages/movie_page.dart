@@ -4,10 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:se380final/common/custom_circleProgress.dart';
+import 'package:se380final/common/fadeAnimation.dart';
 import 'package:se380final/models/Movies/Film/movie.dart';
 import 'package:se380final/pages/error_page.dart';
 import 'package:se380final/viewModels/movieViewModel.dart';
 import 'package:se380final/viewModels/userViewModel.dart';
+import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MoviePage extends StatefulWidget {
@@ -26,15 +28,17 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
   bool expanded = false;
   int selectedIndex = 0;
   bool isComp = false;
+  int trailerTick = 0;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _animationController = AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: 150),
-        reverseDuration: Duration(milliseconds: 150));
-    _animation = Tween<double>(begin: 0, end: 20).animate(_animationController);
+      vsync: this,
+      reverseDuration: Duration(milliseconds: 150),
+      duration: Duration(milliseconds: 150),
+    );
+    _animation = Tween<double>(begin: 0, end: 1).animate(_animationController);
   }
 
   _launchURL(String url) async {
@@ -88,7 +92,7 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
                         backgroundColor: Colors.transparent,
                         child: Center(
                           child: IconButton(
-                            onPressed: () async{
+                            onPressed: () async {
                               //FireStore process
                               await _likeFilm();
                             },
@@ -109,7 +113,8 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
                       child: CircleAvatar(
                         child: Center(
                           child: IconButton(
-                            onPressed: () {
+                            onPressed: () async {
+                              await _getLikes();
                               Navigator.pop(context);
                             },
                             icon: Icon(
@@ -147,14 +152,27 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
-                            Text(
-                              movie.originalTitle +
-                                  " (${movie.releaseDate.toUtc().year.toString()})",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: "MerriWeather",
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 28),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  (movie.title.length>25 ? movie.originalTitle.substring(0,20)+"..." : movie.title) +
+                                      " (${movie.releaseDate.toUtc().year.toString()})",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: "MerriWeather",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: movie.title.length>25 ? 24 : 28),
+                                ),
+                                InkWell(
+                                  onTap: () => _share(context, movie),
+                                  child: Icon(
+                                    Icons.share,
+                                    size: 32,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                             Wrap(
                               spacing: width * 0.005,
@@ -287,7 +305,9 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
                             fontSize: 16,
                           ),
                         ),
-                              isComp ? _buildTrailer(movie.videos.results,height,width): Container()
+                        isComp
+                            ? _buildTrailer(movie.videos.results, height, width)
+                            : Container()
                       ],
                     ),
                   ),
@@ -346,9 +366,6 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
       "About",
       "Info",
       "Reviews",
-      "Directors",
-      "Characters",
-      "Companies"
     ];
     return ListView.builder(
       itemBuilder: (context, index) {
@@ -410,8 +427,8 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
   _getMenuItems(int selectedIndex) {
     switch (selectedIndex) {
       case 0:
-        return BounceInLeft(
-          duration: Duration(milliseconds: 500),
+        return FadeAnimation(
+          delay: .8,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -435,7 +452,7 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
         );
       case 1:
         return BounceInRight(
-          duration: Duration(milliseconds: 500),
+          delay: Duration(milliseconds: 250),
           child: Column(
             children: <Widget>[
               setTextHeader("Info"),
@@ -459,7 +476,7 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
         );
       case 2:
         return BounceInUp(
-          duration: Duration(milliseconds: 500),
+          delay: Duration(milliseconds: 250),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -551,150 +568,209 @@ class _MoviePageState extends State<MoviePage> with TickerProviderStateMixin {
   }
 
   _isCompChange() {
-      if(_animation.status == AnimationStatus.completed || _animation.status == AnimationStatus.forward){
-        Future.delayed(Duration(milliseconds: 850),() => setState(() {
-          isComp = true;
-        }));
-
-      }else if(_animation.status == AnimationStatus.reverse || _animation.status == AnimationStatus.dismissed){
-        Future.delayed(Duration(milliseconds: 250),(){
-          setState(() {
-            isComp = false;
-          });
-        });
+    if (_animation.status == AnimationStatus.completed ||
+        _animation.status == AnimationStatus.forward) {
+      _situationCompleted();
+    }
+    if (_animation.status == AnimationStatus.dismissed) {
+      if (trailerTick == 0) {
+        _situationCompleted();
       }
+      _situationDismissed();
+    }
   }
 
-  _buildTrailer(List<Video> videos,double height,double width) {
+  _buildTrailer(List<Video> videos, double height, double width) {
     return Container(
-      height: height*0.32,
+      height: height * 0.32,
       child: Padding(
-        padding: EdgeInsets.only(left:height*0.005,right: height*0.005,top: height*0.005),
+        padding: EdgeInsets.only(
+            left: height * 0.005, right: height * 0.005, top: height * 0.005),
         child: ListView.builder(
-          itemBuilder: (context,index){
+          itemBuilder: (context, index) {
             final trailer = videos[index];
-            return trailer != null ? Padding(
-              padding: EdgeInsets.only(left:height*0.005,bottom: height*0.03),
-              child: Stack(
-                children: <Widget>[
-                  InkWell(
-                    onTap: () => _launchURL("https://www.youtube.com/watch?v=${trailer.key}"),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                              blurRadius: 12,
-                              spreadRadius: 6,
-                              offset: Offset(-1,1),
-                              color: Colors.black45
-                          )
-                        ],
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                        child: FadeInImage.assetNetwork(placeholder: "assets/loading.gif", image: "https://image.tmdb.org/t/p/original${widget.movie.backdropPath}",imageErrorBuilder: (context,object,stack){
-                          return Image.asset("assets/error.gif",fit: BoxFit.cover,);
-                        },
-                          fit: BoxFit.cover,
-                          fadeInDuration: Duration(milliseconds: 1000),
-                          fadeInCurve: Curves.easeIn,),
-                      ),
-                      height: height*0.2,
-                      width: width*0.4,
-                    ),
-                  ),
-                  SizedBox(
-                    width: width*0.02,
-                  ),
-                  Positioned(
-                    left: width*0.11,
-                    top: height*0.06,
-                    child: InkWell(onTap: () => _launchURL("https://www.youtube.com/watch?v=${trailer.key}"),child: Icon(Icons.play_circle_outline,color: Colors.white,size: 64,)),
-                  ),
-                  Padding(
-                    padding:EdgeInsets.only(top:height*0.07,left:width*0.45),
-                    child: Text(
-                      trailer.name,
-                      style: GoogleFonts.yeonSung(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+            return trailer != null
+                ? Padding(
+                    padding: EdgeInsets.only(
+                        left: height * 0.005, bottom: height * 0.03),
+                    child: Stack(
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () => _launchURL(
+                              "https://www.youtube.com/watch?v=${trailer.key}"),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                    blurRadius: 12,
+                                    spreadRadius: 6,
+                                    offset: Offset(-1, 1),
+                                    color: Colors.black45)
+                              ],
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15)),
+                            ),
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15)),
+                              child: FadeInImage.assetNetwork(
+                                placeholder: "assets/loading.gif",
+                                image:
+                                    "https://image.tmdb.org/t/p/original${widget.movie.backdropPath}",
+                                imageErrorBuilder: (context, object, stack) {
+                                  return Image.asset(
+                                    "assets/error.gif",
+                                    fit: BoxFit.cover,
+                                  );
+                                },
+                                fit: BoxFit.cover,
+                                fadeInDuration: Duration(milliseconds: 1000),
+                                fadeInCurve: Curves.easeIn,
+                              ),
+                            ),
+                            height: height * 0.2,
+                            width: width * 0.4,
+                          ),
+                        ),
+                        SizedBox(
+                          width: width * 0.02,
+                        ),
+                        Positioned(
+                          left: width * 0.11,
+                          top: height * 0.06,
+                          child: InkWell(
+                              onTap: () => _launchURL(
+                                  "https://www.youtube.com/watch?v=${trailer.key}"),
+                              child: Icon(
+                                Icons.play_circle_outline,
+                                color: Colors.white,
+                                size: 64,
+                              )),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: height * 0.07, left: width * 0.45),
+                          child: Text(
+                            trailer.name,
+                            style: GoogleFonts.yeonSung(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                   )
-                ],
-              ),
-            ): Center(
-              child: Text(
-                "Does not Have Any Trailer",
-                style: GoogleFonts.robotoSlab(
-                    color: Colors.black,
-                    shadows: [
-                      BoxShadow(
-                          color: Colors.black54,
-                          offset: Offset(-1,1),
-                          spreadRadius: 6,
-                          blurRadius: 12
-                      )
-                    ],
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold
-                ),
-              ),
-            );
+                : Center(
+                    child: Text(
+                      "Does not Have Any Trailer",
+                      style: GoogleFonts.robotoSlab(
+                          color: Colors.black,
+                          shadows: [
+                            BoxShadow(
+                                color: Colors.black54,
+                                offset: Offset(-1, 1),
+                                spreadRadius: 6,
+                                blurRadius: 12)
+                          ],
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  );
           },
           itemCount: videos.length,
-
         ),
       ),
     );
   }
 
-   _likeFilm() async{
-     final _userModel = Provider.of<UserViewModel>(context,listen: false);
-     bool isLiked = await _userModel.likeFilm(_userModel.user.uid, widget.movie.id.toString());
-     if(isLiked){
-       debugPrint("Likelandı");
-       await _getLikes();
-     }else{
-       debugPrint("Sıkıntı");
-     }
-   }
-   _getLikes() async{
-     final _userModel = Provider.of<UserViewModel>(context,listen: false);
-     await _userModel.getLikes(_userModel.user.uid);
-   }
+  _likeFilm() async {
+    final _userModel = Provider.of<UserViewModel>(context, listen: false);
+    List<String> likes = _userModel.likes;
+    for (int i = 0; i < likes.length; i++) {
+      if (likes[i].contains(widget.movie.id.toString())) {
+        bool isDeleted =
+            await _userModel.deleteLikeFilm(_userModel.user.uid, likes[i]);
+        if (isDeleted) {
+          debugPrint("Deleted");
+          await _getLikes();
+          return true;
+        } else {
+          debugPrint("Problem");
+        }
+      } else {
+        continue;
+      }
+    }
+    bool isLiked = await _userModel.likeFilm(
+        _userModel.user.uid, widget.movie.id.toString());
+    if (isLiked) {
+      debugPrint("Liked");
+      await _getLikes();
+    } else {
+      debugPrint("Problem");
+    }
+  }
 
-  _checkIsLiked(String id){
+  _getLikes() async {
+    final _userModel = Provider.of<UserViewModel>(context, listen: false);
+    await _userModel.getLikes(_userModel.user.uid);
+  }
+
+  _checkIsLiked(String id) {
     final _userModel = Provider.of<UserViewModel>(context);
-
     final likes = _userModel.likes;
-    if(likes.length>0 || likes != null){
-      for(int i = 0 ; i<likes.length;i++){
-        if(likes[i] == id){
+    if (likes != null && likes.length != 0) {
+      for (int i = 0; i < likes.length; i++) {
+        if (likes[i] == id) {
           return Icon(
             Icons.favorite,
             color: Colors.red,
             size: 32,
           );
-        }else if(likes.length-1 == i){
+        } else if (likes.length - 1 == i) {
           return Icon(
             Icons.favorite_border,
             color: Colors.red,
             size: 32,
           );
-        }
-        else{
+        } else {
           continue;
         }
       }
-    }else{
+    } else {
       return Icon(
         Icons.favorite_border,
         color: Colors.red,
         size: 32,
       );
     }
+  }
+
+  _share(BuildContext context, Movie movie) {
+    final RenderBox box = context.findRenderObject();
+    final String text =
+        "I liked a film to share with you what liked film name is \"${movie.title}\" \n https://www.youtube.com/watch?v=${movie.videos.results[0].key}";
+    Share.share(text,
+        subject: "Look a I Liked Film",
+        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+  }
+
+  _situationCompleted() {
+    Future.delayed(
+        Duration(milliseconds: 850),
+        () => setState(() {
+              isComp = true;
+            }));
+  }
+
+  _situationDismissed() {
+    Future.delayed(Duration(milliseconds: 250), () {
+      setState(() {
+        isComp = false;
+        trailerTick += 1;
+      });
+    });
   }
 }

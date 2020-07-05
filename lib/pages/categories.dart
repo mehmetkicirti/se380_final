@@ -1,14 +1,11 @@
-
 import 'package:flutter/material.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:se380final/common/category_card.dart';
 import 'package:se380final/common/colors.dart';
 import 'package:se380final/common/fadeAnimation.dart';
 import 'package:se380final/common/font_style.dart';
-import 'package:se380final/common/my_globals.dart';
+import 'package:se380final/pages/category_list.dart';
 import 'package:se380final/pages/error_page.dart';
-import 'package:se380final/pages/movie_list.dart';
 import 'package:se380final/viewModels/movieViewModel.dart';
 
 class Categories extends StatefulWidget {
@@ -17,19 +14,27 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int pages = 1;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: bgColor,
       resizeToAvoidBottomPadding: false,
       resizeToAvoidBottomInset: false,
-      body:Container(
+      body: Container(
         height: height,
         width: width,
-        child: _buildPage(height,width),
+        child: _buildPage(height, width),
       ),
     );
   }
@@ -56,29 +61,29 @@ class _CategoriesState extends State<Categories> {
     "assets/categoryImages/Western-Movies.png",
   ];
 
-  _getFilmsByGenre(int id, int pages) async{
-    final movieModel = Provider.of<MovieViewModel>(context,listen: false);
+  _getFilmsByGenre(int id, int pages) async {
+    final movieModel = Provider.of<MovieViewModel>(context, listen: false);
     await movieModel.getFilmsByGenreId(id, pages);
   }
 
   _getPagesWithGenre() {
-    final movieModel = Provider.of<MovieViewModel>(context,listen: false);
+    final movieModel = Provider.of<MovieViewModel>(context, listen: false);
     Future.delayed(Duration(milliseconds: 150), () async {
-        await Navigator.push(context,
-            PageTransition(type: PageTransitionType.fade, child: MovieList(header: "Category List",movies: movieModel.filmsByGenre)));
-      });
+        await Navigator.pushReplacement(_scaffoldKey.currentContext,
+            MaterialPageRoute(builder: (context)=>CategoryList(header: "Category List",movies: movieModel.filmsByGenre),fullscreenDialog: true));
+    });
   }
 
   _buildPage(double height, double width) {
     final category = Provider.of<MovieViewModel>(context);
-    switch(category.state){
+    switch (category.state) {
       case MovieState.LoadingMovie:
         return Center(
           child: CircularProgressIndicator(),
         );
       case MovieState.LoadedMovie:
       case MovieState.InitialMovie:
-        if(category.filmsByGenre != null){
+        if (category.filmsByGenre != null) {
           return _getPagesWithGenre();
         }
         return Padding(
@@ -109,44 +114,49 @@ class _CategoriesState extends State<Categories> {
                   ),
                 ),
               ),
-              category.state == MovieState.LoadedMovie ?
-              Positioned(
-                  top: height * 0.17,
-                  child: Container(
-                    height: height * .85,
-                    width: width,
-                    child: GridView.builder(
-                      itemCount: category.category.genres.length,
-                      gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 16 / 10,
-                          crossAxisSpacing: width*0.025,
-                          mainAxisSpacing: width*0.025),
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () async{
-                            await _getFilmsByGenre(category.category.genres[index].id,pages);
+              category.state == MovieState.LoadedMovie
+                  ? Positioned(
+                      top: height * 0.17,
+                      child: Container(
+                        height: height * .85,
+                        width: width,
+                        child: GridView.builder(
+                          itemCount: category.category.genres.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 16 / 10,
+                                  crossAxisSpacing: width * 0.025,
+                                  mainAxisSpacing: width * 0.025),
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () async {
+                                await _getFilmsByGenre(
+                                    category.category.genres[index].id, pages);
+                              },
+                              child: CategoryCard(
+                                title: category.category.genres[index].name,
+                                imgUrl: filmCategoryURL[index],
+                              ),
+                            );
                           },
-                          child: CategoryCard(
-                            title: category.category.genres[index].name,
-                            imgUrl: filmCategoryURL[index],
-                          ),
-                        );
-                      },
-                      shrinkWrap: true,
-                      physics: ScrollPhysics(),
-                      scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          physics: ScrollPhysics(),
+                          scrollDirection: Axis.vertical,
+                        ),
+                      ))
+                  : Center(
+                      child: CircularProgressIndicator(),
                     ),
-                  )
-              ): Center(child: CircularProgressIndicator(),),
             ],
           ),
         );
       case MovieState.NotConnected:
       case MovieState.ErrorMovie:
       default:
-        return ErrorPage(title:"Error Category Page");
+        return ErrorPage(title: "Error Category Page");
     }
   }
+
+
 }

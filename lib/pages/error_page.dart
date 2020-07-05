@@ -20,7 +20,9 @@ class ErrorPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              //IconButton(icon: Icon(Icons.arrow_back_ios),color: Colors.white,onPressed: ()=>Navigator.pop(context),),
+//              IconButton(icon: Icon(Icons.arrow_back_ios),color: Colors.white,onPressed: ()=>Navigator.pushReplacement(context,MaterialPageRoute(
+//                builder: (context) => LoginPage()
+//              )),),
               Padding(
                 padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.2),
                   child: FadeInImage.assetNetwork(image: "https://media1.giphy.com/media/xTcf0WOsgPH90JeWkw/giphy.gif",placeholder: "assets/transparent_loading.gif",fit: BoxFit.cover,)

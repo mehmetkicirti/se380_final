@@ -486,17 +486,24 @@ class _LoginPageState extends State<LoginPage> {
     print("Authorized Google User Id : " + user.uid);
   }
 
+
+
   _signInWithAnonymously(BuildContext context) async {
     final _userModel = Provider.of<UserViewModel>(context, listen: false);
     User user = await _userModel.signInWithAnonymously();
     print("Authorized Anonymously User Id : " + user.uid);
   }
 
-  _signInWithFacebook(BuildContext context) {}
+  _signInWithFacebook(BuildContext context) async {
+    final _userModel = Provider.of<UserViewModel>(context, listen: false);
+    User user = await _userModel.signInWithFacebook();
+
+    print("Authorized Facebook User Id : " + user.uid);
+  }
 
   _getNavigatorPage() {
-    Future.delayed(Duration(milliseconds: 150), () async {
-      await Navigator.push(context,
+    Future.delayed(Duration(milliseconds: 150), () async{
+      await Navigator.pushReplacement(context,
           PageTransition(type: PageTransitionType.fade, child: HomepageCore()));
     });
   }
@@ -852,10 +859,10 @@ class _LoginPageState extends State<LoginPage> {
         return _getNavigatorPage();
       }
     }else if(_userModel.state == UserState.ErrorUser){
-      return ErrorPage(title: "Error : Not Found User",);
+      return ErrorPage(title: "Error : Already have user",);
     }else{
       return Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(backgroundColor: Colors.blueGrey,),
       );
     }
   }
@@ -863,8 +870,8 @@ class _LoginPageState extends State<LoginPage> {
   _signInEmail() async{
     final _userModel = Provider.of<UserViewModel>(context,listen: false);
     try{
-      _userModel.signInWithEmailAndPassword(_email, _password).then((_) async{
-          await _getNavigatorPage();
+      _userModel.signInWithEmailAndPassword(_email, _password).then((user){
+        _getNavigatorPage();
       });
     }on PlatformException catch(e){
       debugPrint("Widget Hata Yakalandı ${e.message}");

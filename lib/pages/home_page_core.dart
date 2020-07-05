@@ -29,13 +29,8 @@ class _HomepageCoreState extends State<HomepageCore> {
     super.initState();
   }
   @override
-  void dispose() {
-    _pageBottomController.dispose();
-    super.dispose();
-  }
-  @override
   Widget build(BuildContext context) {
-    final _movieModel = Provider.of<MovieViewModel>(context,listen: false);
+    final _userModel = Provider.of<UserViewModel>(context,listen: false);
     return WillPopScope(
       onWillPop: () => CustomUtils.onWillPop(context),
       child: Scaffold(
@@ -46,7 +41,7 @@ class _HomepageCoreState extends State<HomepageCore> {
               controller:  _pageBottomController,
               physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
-                Homepage(),
+                Homepage(user:_userModel.user),
                 Categories(),
                 Profile()
               ],
@@ -79,6 +74,7 @@ class _HomepageCoreState extends State<HomepageCore> {
         onTabChangedListener: (index) async{
           final _userModel = Provider.of<UserViewModel>(context,listen: false);
           if(index == 2){
+            await _userModel.getLikes(_userModel.user.uid);
             await _getLikes(_userModel.likes);
           }
           setState(() {
@@ -100,29 +96,3 @@ class _HomepageCoreState extends State<HomepageCore> {
     );
   }
 }
-
-
-/*
-Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async =>
-          !await navigatorKeys[_currentTab].currentState.maybePop(),
-      child: MyCustomBottomNavigation(
-        sayfaOlusturucu: allPages(),
-        navigatorKeys: navigatorKeys,
-        currentTab: _currentTab,
-        onSelectedTab: (selectedTab) {
-          if (selectedTab == _currentTab) {
-            navigatorKeys[selectedTab]
-                .currentState
-                .popUntil((route) => route.isFirst);
-          } else {
-            setState(() {
-              _currentTab = selectedTab;
-            });
-          }
-        },
-      ),
-    );
-  }
- */

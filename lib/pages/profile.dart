@@ -11,7 +11,6 @@ import 'package:se380final/common/colors.dart';
 import 'package:se380final/common/custom_navigator.dart';
 import 'package:se380final/common/fadeAnimation.dart';
 import 'package:se380final/common/font_style.dart';
-import 'package:se380final/common/my_globals.dart';
 import 'package:se380final/models/Movies/Film/movie.dart';
 import 'package:se380final/pages/error_page.dart';
 import 'package:se380final/pages/login_page.dart';
@@ -63,7 +62,7 @@ class _ProfileState extends State<Profile> {
                 left: width * 0.04,
                 right: width * 0.04,
                 child: BounceInDown(
-                    delay: Duration(milliseconds: 1500),
+                    delay: Duration(milliseconds: 1200),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -82,8 +81,8 @@ class _ProfileState extends State<Profile> {
                           padding: EdgeInsets.only(
                               top: height * 0.02, left: width * 0.02),
                           child: Text(
-                              _userModel.user.email.substring(
-                                  0, _userModel.user.email.indexOf("@")),
+                             _userModel.user.email == null ? _userModel.user.userName :  _userModel.user.email.substring(
+                                 0, _userModel.user.email.indexOf("@")),
                               style: GoogleFonts.yeonSung(
                                 color: Colors.white,
                                 fontSize: 32,
@@ -99,7 +98,7 @@ class _ProfileState extends State<Profile> {
                 left: width * 0.1,
                 right: width * 0.5,
                 child: BounceInDown(
-                  delay: Duration(milliseconds: 1500),
+                  delay: Duration(milliseconds: 1200),
                   child: Container(
                     decoration: BoxDecoration(
                         color: Colors.white,
@@ -128,7 +127,7 @@ class _ProfileState extends State<Profile> {
                 top: height * 0.04,
                 right: width * 0.51,
                 child: BounceInDown(
-                  delay: Duration(milliseconds: 1500),
+                  duration: Duration(milliseconds: 1200),
                   child: ClipOval(
                     child: Container(
                       height: height * 0.07,
@@ -184,7 +183,7 @@ class _ProfileState extends State<Profile> {
                     await _signOut();
                   },
                   child: FadeInUp(
-                    delay: Duration(milliseconds: 1600),
+                    duration: Duration(milliseconds: 1200),
                     child: Transform.rotate(
                       angle: -pi / 2,
                       child: Container(
@@ -238,13 +237,14 @@ class _ProfileState extends State<Profile> {
                       ? ListView.builder(
                           itemBuilder: (context, index) {
                             final likedMovies = _movieModel.likedMovies;
-                            return InkWell(
-                              onTap: () => _getMoviePage(likedMovies[index].id),
-                              child: Padding(
-                                padding:EdgeInsets.all(height*0.02),
-                                child: Row(
-                                  children: <Widget>[
-                                    ClipRRect(
+                            return Padding(
+                              padding:EdgeInsets.all(height*0.02),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  InkWell(
+                                    onTap: () => _getMoviePage(likedMovies[index].id),
+                                    child: ClipRRect(
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(15)),
                                       child: FadeInImage(
@@ -257,18 +257,52 @@ class _ProfileState extends State<Profile> {
                                         width: width * 0.35,
                                       ),
                                     ),
-                                    SizedBox(width: width*0.02,),
-                                    Expanded(
-                                      child: Text(
-                                        likedMovies[index].title,
-                                        style: GoogleFonts.robotoSlab(
-                                          fontSize: 20,
-                                          color: Colors.white
+                                  ),
+                                  SizedBox(width: width*0.02,),
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(
+                                          likedMovies[index].title,
+                                          style: GoogleFonts.robotoSlab(
+                                              fontSize: 18,
+                                              color: Colors.white
+                                          ),
                                         ),
-                                      ),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(vertical: height*0.12),
+                                          child: InkWell(
+                                            onTap: () async=> await _deleteFilm(likedMovies[index].id.toString()),
+                                            child: Container(
+                                              height: height*0.05,
+                                              width: width*0.20,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(6)),
+                                                color: Colors.white,
+                                              ),
+                                              child: Row(
+                                                children: <Widget>[
+                                                  SizedBox(width: width*0.01,),
+                                                  Text(
+                                                    "Delete",
+                                                    style: GoogleFonts.robotoSlab(
+                                                    ),
+                                                  ),
+                                                  Icon(
+                                                    Icons.delete_sweep,
+                                                    size: 32,
+                                                    color: Colors.red,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             );
                           },
@@ -375,6 +409,18 @@ class _ProfileState extends State<Profile> {
     Movie movie=await _movieModel.getMovieById(id);
     await _userModel.getLikes(_userModel.user.uid);
     return await NavigatorUtils.pushPage(MoviePage(movie:movie), context, Curves.easeIn, 1000, Alignment.center);
+  }
+
+  _deleteFilm(String cinemaId) async{
+    final _userModel = Provider.of<UserViewModel>(context,listen: false);
+    bool isDeleted=await _userModel.deleteLikeFilm(_userModel.user.uid, cinemaId);
+    if(isDeleted){
+      List<String> likes = await _userModel.getLikes(_userModel.user.uid);
+      await _getLikes(likes);
+      debugPrint("Deleted");
+    }else{
+      debugPrint("Error");
+    }
   }
 }
 

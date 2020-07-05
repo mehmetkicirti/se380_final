@@ -3,6 +3,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:se380final/common/colors.dart';
 import 'package:se380final/common/custom_shape_clipper.dart';
 import 'package:se380final/common/fadeAnimation.dart';
 import 'package:se380final/pages/error_page.dart';
@@ -32,7 +33,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _scaleController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 1000));
@@ -113,7 +113,8 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               hideText == false
                   ? Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                      ),
                     )
                   : _buildAnimationField(width)
             ],
@@ -234,6 +235,7 @@ class _SplashScreenState extends State<SplashScreen>
       child: Align(
         alignment: Alignment.bottomCenter,
         child: BounceInUp(
+          delay: Duration(milliseconds: 1200),
           child: AnimatedBuilder(
             animation: _scaleController,
             builder: (context, child) => Transform.scale(
@@ -256,7 +258,9 @@ class _SplashScreenState extends State<SplashScreen>
                               if (status == AnimationStatus.completed) {
                                 switch (_userModel.state) {
                                   case UserState.LoadingUser:
-                                    return CircularProgressIndicator();
+                                    return CircularProgressIndicator(
+                                      backgroundColor: bgColor,
+                                    );
                                   case UserState.LoadedUser:
                                     if (_userModel.user == null) {
                                       return Navigator.push(

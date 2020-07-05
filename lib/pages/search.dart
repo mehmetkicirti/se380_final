@@ -16,7 +16,6 @@ class _SearchState extends State<Search> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _search = TextEditingController();
   }
