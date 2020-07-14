@@ -43,21 +43,6 @@ class MovieManager implements IMovieService{
   }
 
   @override
-  Future<Result> getByCategoryTvShows(int genreId) async{
-    final url = "$baseUrl/discover/tv?api_key=$apiKey&with_genres=$genreId";
-    var response = await _httpClient.get(url);
-    if(response.statusCode != 200){
-      if(response.statusCode == 408) {
-        throw Exception("When is getting data, is not have any connection..");
-      }else{
-        throw Exception("When is getting data, there is an error occurred..");
-      }
-    }
-    final responseJSON = jsonDecode(response.body);
-    return Result.fromMap(responseJSON);
-  }
-
-  @override
   Future<Movie> getMovieById(int id) async{
     final url = "$baseUrl/movie/$id?api_key=$apiKey&append_to_response=videos";
     var response = await _httpClient.get(url);
@@ -116,38 +101,8 @@ class MovieManager implements IMovieService{
   }
 
   @override
-  Future<Result> getPopularTvShows() async{
-    final url = "$baseUrl/tv/popular?api_key=$apiKey";
-    var response = await _httpClient.get(url);
-    if(response.statusCode != 200){
-      if(response.statusCode == 408) {
-        throw Exception("When is getting data, is not have any connection..");
-      }else{
-        throw Exception("When is getting data, there is an error occurred..");
-      }
-    }
-    final responseJSON = jsonDecode(response.body);
-    return Result.fromMap(responseJSON);
-  }
-
-  @override
   Future<Result> getSimilarMovies(int id) async{
     final url = "$baseUrl/movie/$id/similar?api_key=$apiKey";
-    var response = await _httpClient.get(url);
-    if(response.statusCode != 200){
-      if(response.statusCode == 408) {
-        throw Exception("When is getting data, is not have any connection..");
-      }else{
-        throw Exception("When is getting data, there is an error occurred..");
-      }
-    }
-    final responseJSON = jsonDecode(response.body);
-    return Result.fromMap(responseJSON);
-  }
-
-  @override
-  Future<Result> getSimilarTvShows(int id) async{
-    final url = "$baseUrl/tv/$id/similar?api_key=$apiKey";
     var response = await _httpClient.get(url);
     if(response.statusCode != 200){
       if(response.statusCode == 408) {

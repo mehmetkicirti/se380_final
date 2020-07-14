@@ -116,7 +116,7 @@ class UserViewModel with ChangeNotifier implements IAuthService,ILikeService,IFi
       _user = await _userRepository.signInWithFacebook();
       return _user;
     }catch(e){
-      print("View Model signInWithGoogle error $e");
+      print("View Model signInWithFacebook error $e");
       return null;
     }finally{
       if(_user == null){

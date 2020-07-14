@@ -55,17 +55,24 @@ class UserRepository implements IAuthService,ILikeService,IFireStorageService{
      */
     User user = await _firebaseAuthService.signInWithEmailAndPassword(email, password);
     user =await _firestoreService.readUser(user.uid);
-    return _firestoreService.readUser(user.uid);
+    bool result = await _firestoreService.saveUser(user);
+    if(result){
+      return await _firestoreService.readUser(user.uid);
+    }
+    else return null;
   }
 
   @override
   Future<User> signInWithFacebook() async {
     User user =  await _firebaseAuthService.signInWithFacebook();
     user =await _firestoreService.readUser(user.uid);
-    bool result = await _firestoreService.saveUser(user);
-    if(result)
-      return await _firestoreService.readUser(user.uid);
-    else return null;
+
+    if(user == null){
+      bool result = await _firestoreService.saveUser(user);
+      if(result){
+        return await _firestoreService.readUser(user.uid);
+      }else return null;
+    }else return await _firestoreService.readUser(user.uid);
   }
 
   @override
@@ -73,8 +80,9 @@ class UserRepository implements IAuthService,ILikeService,IFireStorageService{
     User user =  await _firebaseAuthService.signInWithGoogle();
     user =await _firestoreService.readUser(user.uid);
     bool result = await _firestoreService.saveUser(user);
-    if(result)
+    if(result){
       return await _firestoreService.readUser(user.uid);
+    }
     else return null;
   }
 
