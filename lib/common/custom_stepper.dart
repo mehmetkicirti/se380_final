@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:se380final/common/colors.dart';
-import 'package:se380final/common/platform_sensitive_dialog.dart';
 import 'package:se380final/models/User/users.dart';
 import 'package:se380final/utils/formOptions.dart';
 import 'package:se380final/viewModels/userViewModel.dart';
@@ -53,7 +52,7 @@ class _CustomStepperState extends State<CustomStepper> {
                   return Row(
                     children: <Widget>[
                       RaisedButton(
-                        color: success,
+                        color: warning,
                         elevation: 10,
                         onPressed: onStepContinue,
                         child:Text(_activeStep==2?"SignUp":"Continue!",style: TextStyle(color: Colors.white,fontSize: 16),),
@@ -234,21 +233,10 @@ class _CustomStepperState extends State<CustomStepper> {
   }
   formCompleted() async{
     final _userModel = Provider.of<UserViewModel>(context,listen: false);
-    try{
       User user =await _userModel.createUserWithEmailAndPassword(_email, _password);
       if(user!= null){
         await _userModel.signOut();
         widget.isChanged();
       }
-    }on PlatformException catch(e){
-      debugPrint("Widget Hata Yakalandı ${e.message}");
-      showDialog(context: context,builder: (context){
-        return PlatformSensitiveDialog(
-          header: "Error",
-          message: e.message,
-          mainButtonWords: "OK",
-        );
-      },barrierDismissible: false);
     }
-  }
 }

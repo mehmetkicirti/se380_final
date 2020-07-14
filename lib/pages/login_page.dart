@@ -9,7 +9,6 @@ import 'package:se380final/common/colors.dart';
 import 'package:se380final/common/custom_icon.dart';
 import 'package:se380final/common/custom_stepper.dart';
 import 'package:se380final/common/custom_text_form_field.dart';
-import 'package:se380final/common/platform_sensitive_dialog.dart';
 import 'package:se380final/models/User/users.dart';
 import 'package:se380final/pages/error_page.dart';
 import 'package:se380final/pages/home_page_core.dart';
@@ -542,6 +541,7 @@ class _LoginPageState extends State<LoginPage> {
                           textColor: Colors.white,
                           iconSize: 30,
                           hintColor: Colors.white,
+                          hiddenText: false,
                           hintText: "Please enter a valid email",
                           iconColor: Colors.white,
                           labelText: "Email",
@@ -859,7 +859,7 @@ class _LoginPageState extends State<LoginPage> {
         return _getNavigatorPage();
       }
     }else if(_userModel.state == UserState.ErrorUser){
-      return ErrorPage(title: "Error : Already have user",);
+      return ErrorPage(title: "Error: Username or Password already have",);
     }else{
       return Center(
         child: CircularProgressIndicator(backgroundColor: Colors.blueGrey,),
@@ -869,23 +869,10 @@ class _LoginPageState extends State<LoginPage> {
 
   _signInEmail() async{
     final _userModel = Provider.of<UserViewModel>(context,listen: false);
-    try{
-      _userModel.signInWithEmailAndPassword(_email, _password).then((user){
-        _getNavigatorPage();
-      });
-    }on PlatformException catch(e){
-      debugPrint("Widget Hata Yakalandı ${e.message}");
-      showDialog(context: context,builder: (context){
-        return PlatformSensitiveDialog(
-          header: "Error",
-          message: e.message,
-          mainButtonWords: "OK",
-        );
-      },barrierDismissible: false);
+      await _userModel.signInWithEmailAndPassword(_email, _password);
       _login_formKey.currentState.reset();
       setState(() {
         _autofocus = true;
       });
     }
-  }
 }

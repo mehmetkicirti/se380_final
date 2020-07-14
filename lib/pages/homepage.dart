@@ -272,7 +272,6 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   }
 
   _sidebarNavigation(double height, double width) {
-    final _userModel = Provider.of<UserViewModel>(context);
     final user = widget.user;
     return Stack(
       overflow: Overflow.clip,
@@ -348,7 +347,7 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
                               delay: Duration(milliseconds: 1300),
                               child: Text(
                                 user.email == null ? user
-                                    .uid : user.email.substring(
+                                    .userName : user.email.substring(
                                     0, user.email.indexOf("@")),
                                 style: GoogleFonts.robotoSlab(
                                     color: Colors.white,

@@ -24,26 +24,4 @@ class NavigatorUtils{
         }));
 
   }
-/*static Future<bool> backToPage(BuildContext context,int milliSeconds,Curve curve, Alignment alignment, Widget widget) async{
-     return Navigator.of(context).pop(PageRouteBuilder(
-        transitionDuration:
-        Duration(milliseconds: milliSeconds),
-        transitionsBuilder: (context,
-            animation, secAnimation, widget) {
-          animation = CurvedAnimation(
-              parent: animation,
-              curve: curve);
-          return ScaleTransition(
-            child: widget,
-            scale: animation,
-            alignment: alignment,
-          );
-        },
-        pageBuilder: (context, animation,
-            secAnimation) {
-          return widget;
-        }
-    ));
-  }
-}*/
 }
